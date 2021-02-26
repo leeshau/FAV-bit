@@ -17,6 +17,12 @@ unsigned long get_size(std::fstream &fstream);
 
 int check_sizes(unsigned long source, unsigned long latter);
 
+/**
+ * @param byte byte to be modified
+ * @param position pos from right in the byte, max 7
+ * @param bit to set 0 or 1
+ * @return new modified byte
+ */
 int8_t modify_bit(int8_t byte, int position, bool bit);
 
 int main(int argc, char **argv) {
@@ -56,30 +62,31 @@ int main(int argc, char **argv) {
 
 int extract(std::fstream &source, std::fstream &latter) {
     const unsigned long source_size = get_size(source);
-    const unsigned long latter_size = 310200; //TODO zjisti
-//    const unsigned long latter_size = get_size(latter);
+    unsigned long latter_size;
+    source.seekg(-sizeof(unsigned long), std::ios::end);
+    source.read((char *)&latter_size, sizeof(unsigned long));
+    std::cout << "Size of latter is [" << latter_size << "].\n";
 
-//    if (check_sizes(source_size, latter_size) == CHECK_ERROR) {
-//        return CHECK_ERROR;
-//    }
+    if (check_sizes(source_size, latter_size) == CHECK_ERROR) {
+        return CHECK_ERROR;
+    }
 
-    int8_t source_byte1, source_byte2, final_byte, bit;
-    for (int i = 0; i < latter_size; i += 2) {
-        source.seekg(i + MATRIX_BEGIN, std::ios::beg);
+    int8_t source_byte1, source_byte2, latter_byte, bit;
+    for (int i = MATRIX_BEGIN, j = 0; i < source_size && j < latter_size; i += 2, j++) {
+        source.seekg(i, std::ios::beg);
         source_byte1 = source.get();
         source_byte2 = source.get();
 
-        final_byte = 0x00;
+        latter_byte = 0x00;
         //we start from the right side
         for (bit = 0; bit < 4; bit++){
-            final_byte = modify_bit(final_byte, bit, ((source_byte2 >> (bit + 4)) & 0b1));
+            latter_byte = modify_bit(latter_byte, bit, ((source_byte2 >> bit) & 0b1));
         }
-        for (bit = 0; bit < 4; bit++){
-            final_byte = modify_bit(final_byte, bit, ((source_byte1 >> (bit + 4)) & 0b1));
+        for (bit = 4; bit < 8; bit++){
+            latter_byte = modify_bit(latter_byte, bit, ((source_byte1 >> (bit - 4)) & 0b1));
         }
-
-        latter.seekp(i / 2, std::ios::beg);
-        latter.write((char *)&final_byte, sizeof(int8_t));
+        latter.seekp(j, std::ios::beg);
+        latter.put(latter_byte);
     }
     latter.flush();
     return OK_RETURN;
@@ -94,41 +101,32 @@ int merge(std::fstream &source, std::fstream &latter) {
         return CHECK_ERROR;
     }
 
-//    int8_t latter_byte, source_byte, final_byte, offset, bit;
-//    for (int i = MATRIX_BEGIN; i < source_size; i++) {
-//        latter.seekg(i / 2, std::ios::beg);
-//        latter.read((char *)&latter_byte, sizeof(int8_t));
-//
-//        source.seekg(i, std::ios::beg);
-//        source.read((char *)&source_byte, sizeof(int8_t));
-//
-//        final_byte = source_byte;
-//        offset = i % 2; //TODO test
-//        for (bit = 0; bit < 4; bit++){
-//            final_byte = modify_bit(final_byte, bit * offset, ((latter_byte >> bit) & 0b1));
-//        }
-//
-//        source.seekp(i, std::ios::beg);
-//        source.write((char *)&final_byte, sizeof(int8_t));
-//    }
-    int8_t latter_byte, source_byte, final_byte, offset, bit;
-    for (int i = 0; i < latter_size; i++) {
-        latter.seekg(i / 2, std::ios::beg);
-        latter.read((char *)&latter_byte, sizeof(int8_t));
+    int8_t latter_byte, source_byte1, source_byte2, bit;
+    for (int i = MATRIX_BEGIN, j = 0; i < source_size && j < latter_size; i += 2, j++) {
+        latter.seekg(j, std::ios::beg);
+        latter_byte = latter.get();
 
-        source.seekg(i + MATRIX_BEGIN, std::ios::beg);
-        source.read((char *)&source_byte, sizeof(int8_t));
+        source.seekg(i, std::ios::beg);
+        source_byte1 = source.get();
+        source_byte2 = source.get();
 
-        final_byte = source_byte;
-        offset = i % 2; //TODO test, maybe (i + 1) % 2
         for (bit = 0; bit < 4; bit++){
-            final_byte = modify_bit(final_byte, bit + (4 * offset), ((latter_byte >> bit) & 0b1));
+            //left side of the latter_byte
+            source_byte1 = modify_bit(source_byte1, bit, ((latter_byte >> (bit + 4)) & 0b1));
+            //right side of the latter_byte
+            source_byte2 = modify_bit(source_byte2, bit, ((latter_byte >> bit) & 0b1));
         }
 
-        source.seekp(i + MATRIX_BEGIN, std::ios::beg);
-        source.write((char *)&final_byte, sizeof(int8_t));
+        source.seekp(i, std::ios::beg);
+        source.put(source_byte1);
+        source.put(source_byte2);
     }
     source.flush();
+
+    //save the original size for extraction
+    source.seekp(-sizeof(unsigned long), std::ios::end);
+    source.write((char *)&latter_size, sizeof(unsigned long));
+
     return OK_RETURN;
 }
 
@@ -151,6 +149,10 @@ unsigned long get_size(std::fstream &fstream) {
 }
 
 int8_t modify_bit(int8_t byte, int position, bool bit) {
+    if (position > 7){
+        std::cerr << "Cannot move more than 7 bits left!\n";
+        return byte;
+    }
     int mask = 1 << position;
     return (byte & ~mask) | ((bit << position) & mask);
 }
