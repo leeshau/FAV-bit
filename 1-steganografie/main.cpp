@@ -154,4 +154,3 @@ int8_t modify_bit(int8_t byte, int position, bool bit) {
     int mask = 1 << position;
     return (byte & ~mask) | ((bit << position) & mask);
 }
-
