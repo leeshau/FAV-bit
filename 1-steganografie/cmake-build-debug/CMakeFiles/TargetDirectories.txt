@@ -1,3 +1,0 @@
-/home/lesa/CLionProjects/bit/1-steganografie/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/lesa/CLionProjects/bit/1-steganografie/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/lesa/CLionProjects/bit/1-steganografie/cmake-build-debug/CMakeFiles/1_steganografie.dir
