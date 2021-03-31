@@ -13,13 +13,15 @@ public class Main {
     static final LinkedList<String> keys = new LinkedList<>();
 
     private static final String OUTPUT_FILE = "output.txt";
+    private static String inputFile;
 
     public static void main(String[] args) {
         if (args.length != 2) {
             System.err.println("Enter two args (file and keys).");
             System.exit(1);
         }
-        loadFile(args[0]);
+        inputFile = args[0];
+        loadFile(inputFile);
         loadKeys(args[1]);
 
         try {
@@ -40,10 +42,8 @@ public class Main {
             String hexStr = Integer.toBinaryString(hex);
             blocks.add(get8PlaceBin(hexStr));
         }
+        //decoding
         FileOutputStream output = new FileOutputStream(OUTPUT_FILE, true);
-//        while (sc.hasNext()) {
-//            int hexInt = sc.nextInt(16);
-//            String hexStr = Integer.toBinaryString(hexInt);
         for (char[] blockChars : blocks) {
             for (char c : blockChars) {
                 char[] block = get8PlaceBin(Integer.toBinaryString(c));
@@ -60,23 +60,24 @@ public class Main {
                 }
                 String hex = Integer.toHexString(getByte(block)) + " ";
                 output.write(hex.getBytes(StandardCharsets.UTF_8));
-//                byte b = 0x00;
-//                b |= 1 << 1;
-//                b |= 1;
-//                b &= ~(1 << 1);
             }
         }
 
         output.write('\n');
 
-        for (char[] blockChars : blocks) {
-//            for (char c: blockChars)
+        if (inputFile.matches("^(.*?)+.txt$")) {
+            for (char[] blockChars : blocks)
                 output.write(getByte(blockChars));
         }
-//        output.
+        else {
+            FileOutputStream f_feistel = new FileOutputStream("feistel_" + inputFile, false);
+            for (char[] blockChars : blocks)
+                f_feistel.write(getByte(blockChars));
+            f_feistel.flush();
+            f_feistel.close();
+        }
         output.flush();
         output.close();
-
     }
 
     private static void encipher() throws IOException {
