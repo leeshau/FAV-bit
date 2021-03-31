@@ -38,7 +38,7 @@ public class Main {
         while (sc.hasNext()) {
             int hex = sc.nextInt(16);
             String hexStr = Integer.toBinaryString(hex);
-            blocks.add(hexStr.toCharArray());
+            blocks.add(get8PlaceBin(hexStr));
         }
         FileOutputStream output = new FileOutputStream(OUTPUT_FILE, true);
 //        while (sc.hasNext()) {
@@ -70,8 +70,8 @@ public class Main {
         output.write('\n');
 
         for (char[] blockChars : blocks) {
-            for (char c: blockChars)
-                output.write(c);
+//            for (char c: blockChars)
+                output.write(getByte(blockChars));
         }
 //        output.
         output.flush();
