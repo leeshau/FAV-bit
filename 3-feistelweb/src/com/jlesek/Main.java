@@ -63,8 +63,14 @@ public class Main {
         return xored;
     }
 
-    private static char[] hashRightSide(char[] right) {
+    private static char[] hashRightSide(final char[] right, char[] key) {
+        //xor with key
+        char[] res = xor(right, key);
+        //negate res
+        for (char ch: res)
+            ch = ch == '0' ? '1' : '0';
 
+        return res;
     }
 
     private static char[] splitBlock(char[] block, boolean left) {
