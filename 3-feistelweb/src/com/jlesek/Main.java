@@ -98,11 +98,6 @@ public class Main {
                 }
                 String hex = Integer.toHexString(getByte(block)) + " ";
                 output.write(hex.getBytes(StandardCharsets.UTF_8));
-//                byte b = 0x00;
-//                b |= 1 << 1;
-//                b |= 1;
-//                b &= ~(1 << 1);
-
             }
         }
         output.write('\n');
@@ -113,11 +108,7 @@ public class Main {
     private static byte getByte(char[] block) {
         byte b = 0x00;
         for (int i = 7; i >= 0; i--) {
-//            int a = Integer.parseInt(String.valueOf(block[i]));
-//            if (a == 1)
-//                b += Math.pow(2, i); //sort of hack to avoid stupid Java bitwise operations
             if (block[i] == '1')
-//                b |= (-i + 7) << 1;
                 b += Math.pow(2, (-i + 7)); //sort of hack to avoid stupid Java bitwise operations
         }
         return b;
