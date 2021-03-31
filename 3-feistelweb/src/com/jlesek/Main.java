@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Main {
 
-    static char[] file;
+    static final ArrayList<char[]> blocks = new ArrayList<>();
     static final LinkedList<String> keys = new LinkedList<>();
 
     public static void main(String[] args) {
@@ -19,6 +20,8 @@ public class Main {
         }
 	    loadFile(args[0]);
 	    loadKeys(args[1]);
+
+
         int a = 4;
     }
 
@@ -41,10 +44,18 @@ public class Main {
         try {
             File f = new File(filename);
             FileReader fr = new FileReader(f);
-            file = new char[(int) f.length()];
+            char[] file = new char[(int) f.length()];
             int i, j = 0;
             while ( (i = fr.read()) != -1){
                 file[j++] = (char) i;
+            }
+            char[] block = new char[8];
+            int rest;
+            for (i = 0; i < file.length; i++){
+                rest = i % 8;
+                block[rest] = file[i];
+                if (rest == 7)
+                    blocks.add(block.clone());
             }
         } catch (FileNotFoundException e) {
             System.err.println("File not found!");
