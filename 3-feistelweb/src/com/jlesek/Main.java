@@ -3,6 +3,7 @@ package com.jlesek;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -23,33 +24,76 @@ public class Main {
 
         try {
             encipher();
+            decipher();
         } catch (IOException e) {
             System.err.println("Something went wrong with writing out to the output file.");
             System.exit(7);
         }
-        int a = 4;
+    }
+
+    private static void decipher() throws IOException {
+        //reading ciphered text into blocks and converting it to binary
+        blocks.clear();
+        Scanner sc = new Scanner(new File(OUTPUT_FILE));
+        while (sc.hasNext()) {
+            int hex = sc.nextInt(16);
+            String hexStr = Integer.toBinaryString(hex);
+            blocks.add(hexStr.toCharArray());
+        }
+        FileOutputStream output = new FileOutputStream(OUTPUT_FILE, true);
+//        while (sc.hasNext()) {
+//            int hexInt = sc.nextInt(16);
+//            String hexStr = Integer.toBinaryString(hexInt);
+        for (char[] blockChars : blocks) {
+            for (char c : blockChars) {
+                char[] block = get8PlaceBin(Integer.toBinaryString(c));
+                char[] L = splitBlock(block, true);
+                char[] R = splitBlock(block, false);
+
+                for (int i = keys.size() - 1; i >= 0; i--) {
+                    char[] left = L.clone(), right = R.clone();
+                    //left side
+                    L = R.clone();
+                    //right side
+                    right = hashRightSide(right, keys.get(i).toCharArray());
+                    R = xor(left, right);
+                }
+                String hex = Integer.toHexString(getByte(block)) + " ";
+                output.write(hex.getBytes(StandardCharsets.UTF_8));
+//                byte b = 0x00;
+//                b |= 1 << 1;
+//                b |= 1;
+//                b &= ~(1 << 1);
+            }
+        }
+
+        output.write('\n');
+
+        for (char[] blockChars : blocks) {
+            for (char c: blockChars)
+                output.write(c);
+        }
+//        output.
+        output.flush();
+        output.close();
+
     }
 
     private static void encipher() throws IOException {
-        new File(OUTPUT_FILE).delete();
-        FileOutputStream output = new FileOutputStream(OUTPUT_FILE, true);
-        for (char[] Stringblock : blocks) {
-            for (char c : Stringblock) {
+        FileOutputStream output = new FileOutputStream(OUTPUT_FILE, false);
+        for (char[] stringBlock : blocks) {
+            for (char c : stringBlock) {
                 char[] block = get8PlaceBin(Integer.toBinaryString(c));
                 char[] L = splitBlock(block, true);
                 char[] R = splitBlock(block, false);
 
                 for (String key : keys) {
                     char[] left = L.clone(), right = R.clone();
-
                     //left side
                     L = R.clone();
-
                     //right side
                     right = hashRightSide(right, key.toCharArray());
                     R = xor(left, right);
-
-                    int a = 4;
                 }
                 String hex = Integer.toHexString(getByte(block)) + " ";
                 output.write(hex.getBytes(StandardCharsets.UTF_8));
@@ -60,6 +104,7 @@ public class Main {
 
             }
         }
+        output.write('\n');
         output.flush();
         output.close();
     }
@@ -79,10 +124,10 @@ public class Main {
 
     private static char[] xor(final char[] left, final char[] right) {
         if (left.length != right.length) {
-            System.err.println(left + " and " + right + " are not the same length!");
+            System.err.println(Arrays.toString(left) + " and " + Arrays.toString(right) + " are not the same length!");
             System.exit(6);
         } else if (!String.valueOf(left).matches("[0-1]+") || !String.valueOf(right).matches("[0-1]+")) {
-            System.err.println(left + " or " + right + " are not in proper format for xor!");
+            System.err.println(Arrays.toString(left) + " or " + Arrays.toString(right) + " are not in proper format for xor!");
             System.exit(7);
         }
 
