@@ -1,9 +1,7 @@
 package com.jlesek;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -13,6 +11,8 @@ public class Main {
     static final ArrayList<char[]> blocks = new ArrayList<>();
     static final LinkedList<String> keys = new LinkedList<>();
 
+    private static final String OUTPUT_FILE = "output.txt";
+
     public static void main(String[] args) {
         if (args.length != 2) {
             System.err.println("Enter two args (file and keys).");
@@ -21,14 +21,21 @@ public class Main {
         loadFile(args[0]);
         loadKeys(args[1]);
 
-        encipher();
+        try {
+            encipher();
+        } catch (IOException e) {
+            System.err.println("Something went wrong with writing out to the output file.");
+            System.exit(7);
+        }
         int a = 4;
     }
 
-    private static void encipher() {
+    private static void encipher() throws IOException {
+        new File(OUTPUT_FILE).delete();
+        FileOutputStream output = new FileOutputStream(OUTPUT_FILE, true);
         for (char[] Stringblock : blocks) {
-            for (char ch : Stringblock) {
-                char[] block = get8PlaceBin(Integer.toBinaryString(ch));
+            for (char c : Stringblock) {
+                char[] block = get8PlaceBin(Integer.toBinaryString(c));
                 char[] L = splitBlock(block, true);
                 char[] R = splitBlock(block, false);
 
@@ -39,13 +46,35 @@ public class Main {
                     L = R.clone();
 
                     //right side
-                    right = hashRightSide(right);
+                    right = hashRightSide(right, key.toCharArray());
                     R = xor(left, right);
 
                     int a = 4;
                 }
+                String hex = Integer.toHexString(getByte(block)) + " ";
+                output.write(hex.getBytes(StandardCharsets.UTF_8));
+//                byte b = 0x00;
+//                b |= 1 << 1;
+//                b |= 1;
+//                b &= ~(1 << 1);
+
             }
         }
+        output.flush();
+        output.close();
+    }
+
+    private static byte getByte(char[] block) {
+        byte b = 0x00;
+        for (int i = 7; i >= 0; i--) {
+//            int a = Integer.parseInt(String.valueOf(block[i]));
+//            if (a == 1)
+//                b += Math.pow(2, i); //sort of hack to avoid stupid Java bitwise operations
+            if (block[i] == '1')
+//                b |= (-i + 7) << 1;
+                b += Math.pow(2, (-i + 7)); //sort of hack to avoid stupid Java bitwise operations
+        }
+        return b;
     }
 
     private static char[] xor(final char[] left, final char[] right) {
@@ -67,8 +96,8 @@ public class Main {
         //xor with key
         char[] res = xor(right, key);
         //negate res
-        for (char ch: res)
-            ch = ch == '0' ? '1' : '0';
+        for (int i = 0; i < res.length; i++)
+            res[i] = res[i] == '0' ? '1' : '0';
 
         return res;
     }
@@ -86,7 +115,7 @@ public class Main {
 
     private static char[] get8PlaceBin(String string) {
         char[] res = new char[8];
-        for (int i = 0; i < 8 ; i++){
+        for (int i = 0; i < 8; i++) {
             res[res.length - 1 - i] =
                     string.length() <= i ?
                             '0' :
