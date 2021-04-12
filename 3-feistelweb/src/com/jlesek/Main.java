@@ -16,6 +16,7 @@ public class Main {
     private static String inputFile;
 
     public static void main(String[] args) {
+
         if (args.length != 2) {
             System.err.println("Enter two args (file and keys).");
             System.exit(1);
@@ -45,19 +46,21 @@ public class Main {
         //decoding
         FileOutputStream output = new FileOutputStream(OUTPUT_FILE, true);
         for (char[] block : blocks) {
-                char[] L = splitBlock(block, true);
-                char[] R = splitBlock(block, false);
+            char[] L = splitBlock(block, true);
+            char[] R = splitBlock(block, false);
 
-                for (int i = keys.size() - 1; i >= 0; i--) {
-                    char[] left = L.clone(), right = R.clone();
-                    //left side
-                    L = R.clone();
-                    //right side
-                    right = hashRightSide(right, keys.get(i).toCharArray());
-                    R = xor(left, right);
-                }
-                String hex = Integer.toHexString(getByte(block)) + " ";
-                output.write(hex.getBytes(StandardCharsets.UTF_8));
+            for (int i = keys.size() - 1; i >= 0; i--) {
+                char[] left = L.clone(), right = R.clone();
+                //left side
+                L = R.clone();
+                //right side
+                right = hashRightSide(right, keys.get(i).toCharArray());
+                R = xor(left, right);
+            }
+            System.arraycopy(R, 0, block, 0, 4);
+            System.arraycopy(L, 0, block, 4, 4);
+            String hex = Integer.toHexString(getByte(block)) + " ";
+            output.write(hex.getBytes());
         }
 
         output.write('\n');
@@ -65,8 +68,7 @@ public class Main {
         if (inputFile.matches("^(.*?)+.txt$")) {
             for (char[] blockChars : blocks)
                 output.write(getByte(blockChars));
-        }
-        else {
+        } else {
             FileOutputStream f_feistel = new FileOutputStream("feistel_" + inputFile, false);
             for (char[] blockChars : blocks)
                 f_feistel.write(getByte(blockChars));
@@ -96,7 +98,9 @@ public class Main {
                 System.arraycopy(R, 0, block, 0, 4);
                 System.arraycopy(L, 0, block, 4, 4);
                 String hex = Integer.toHexString(getByte(block)) + " ";
-                output.write(hex.getBytes(StandardCharsets.UTF_8));
+                if (hex.length() == 2)
+                    hex = "0" + hex;
+                output.write(hex.getBytes());
             }
         }
         output.write('\n');
