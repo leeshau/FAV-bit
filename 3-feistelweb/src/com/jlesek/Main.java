@@ -44,9 +44,7 @@ public class Main {
         }
         //decoding
         FileOutputStream output = new FileOutputStream(OUTPUT_FILE, true);
-        for (char[] blockChars : blocks) {
-            for (char c : blockChars) {
-                char[] block = get8PlaceBin(Integer.toBinaryString(c));
+        for (char[] block : blocks) {
                 char[] L = splitBlock(block, true);
                 char[] R = splitBlock(block, false);
 
@@ -60,7 +58,6 @@ public class Main {
                 }
                 String hex = Integer.toHexString(getByte(block)) + " ";
                 output.write(hex.getBytes(StandardCharsets.UTF_8));
-            }
         }
 
         output.write('\n');
@@ -96,6 +93,8 @@ public class Main {
                     right = hashRightSide(right, key.toCharArray());
                     R = xor(left, right);
                 }
+                System.arraycopy(R, 0, block, 0, 4);
+                System.arraycopy(L, 0, block, 4, 4);
                 String hex = Integer.toHexString(getByte(block)) + " ";
                 output.write(hex.getBytes(StandardCharsets.UTF_8));
             }
@@ -105,12 +104,13 @@ public class Main {
         output.close();
     }
 
-    private static byte getByte(char[] block) {
-        byte b = 0x00;
+    private static int getByte(char[] block) {
+        int b = 0x00;
         for (int i = 7; i >= 0; i--) {
             if (block[i] == '1')
                 b += Math.pow(2, (-i + 7)); //sort of hack to avoid stupid Java bitwise operations
         }
+//        return b & 0xFF;
         return b;
     }
 
@@ -133,8 +133,12 @@ public class Main {
         //xor with key
         char[] res = xor(right, key);
         //negate res
+        char[] neg = new char[4];
         for (int i = 0; i < res.length; i++)
-            res[i] = res[i] == '0' ? '1' : '0';
+            neg[i] = key[i] == '0' ? '1' : '0';
+
+        for (int i = 0; i < res.length; i++)
+            res[i] = (res[i] == '1' && neg[i] == '1') ? '1' : '0';
 
         return res;
     }
