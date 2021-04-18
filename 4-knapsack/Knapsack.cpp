@@ -84,7 +84,7 @@ std::vector<std::size_t> Knapsack::cypher(std::basic_string<unsigned char> messa
         }
         cyphered.push_back(txtVal);
     }
-    log(cyphered, true);
+    log(cyphered, false);
     return cyphered;
 }
 
@@ -100,4 +100,72 @@ void Knapsack::log(const std::vector<size_t>& vector, const bool hex) {
     for (const auto &c : vector)
         off << c << ", ";
     off << std::endl;
+    off.flush();
+    off.close();
+}
+
+std::string Knapsack::decypher(const std::vector<size_t> &cypher, size_t p, size_t q) {
+    size_t pInv = getInvP(p, q);
+
+    std::ofstream off(this->outputFile, std::ios::out | std::ios::binary);
+    if (!off.is_open())
+        throw std::runtime_error("Error while opening the output stream!");
+    off << std::hex;
+
+    std::vector<std::basic_string<unsigned char>> decypher{};
+    for (const auto &messageValue : cypher) {
+        std::vector<size_t> keyValIx = getKeyValIx(messageValue, pInv, q, off);
+        unsigned char decipheredChar = 0;
+        size_t charIndex = 0;  /// Index of character in deciphered block - with 16 key length there are 2 chars in the block
+        for (size_t i = keyValIx.size(); i > 0; --i) {
+            if ((keyValIx[i - 1] / 8) > charIndex) {
+                do {    /// If ciphering with 16 / 24 key length and char in the middle is 0, we need to decipher it too
+                    decypher.push_back(decipheredChar);
+                    decipheredChar = 0;
+                    charIndex++;
+                } while ((keyValIx[i - 1] / 8) > charIndex);
+            }
+
+            decipheredChar |= 1UL << (keyValIx[i - 1] % 8);
+        }
+
+        decypher.push_back(decipheredChar);
+        if (!keyValIx.empty() && ((keyValIx.front() / 8) < ((privateKey.size() / 8) - 1))) {
+            decypher.push_back(0);       /// If ciphering with 16 / 24 key length and last char is 0, we need
+        }                                           /// to decipher it too
+
+        if (keyValIx.empty()) {  /// All characters were 0 - we need to decipher them all
+            for (int i = 0; i < (privateKey.size() / 8) - 1; ++i) {
+                decypher.push_back(0);
+            }
+        }
+    }
+
+    off << std::endl;
+    off.flush();
+    off.close();
+    return decypher;
+}
+
+std::size_t Knapsack::getInvP(const std::size_t p, const std::size_t q) {
+    std::size_t inverseP = 1;
+    while ((p * inverseP % q) != 1) {
+        inverseP++;
+    }
+    return inverseP;
+}
+
+std::vector<size_t> Knapsack::getKeyValIx(const size_t &value, size_t invP, size_t q, std::ofstream &off) {
+    size_t decypher = value * invP % q;
+    off << std::to_string(decypher) << ", ";
+    std::vector<size_t> keyValIx;
+    for (size_t i = privateKey.size(); i > 0; i--) {
+        if (privateKey[i - 1] <= decypher) {
+            decypher -= privateKey[i - 1];
+            keyValIx.push_back(i - 1);   /// We need to find the indexes of every key value we found
+        }
+        if (decypher == 0)
+            break;
+    }
+    return keyValIx;
 }

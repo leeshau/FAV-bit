@@ -15,10 +15,12 @@ int main(int argc, char** argv) {
         std::cerr << "p or q are not digits!\n";
         return 2;
     }
-    Knapsack k{"private_key.txt"};
-    k.makePublicKey(std::stoul(argv[2]), std::stoul(argv[3]));\
+    Knapsack k{"private_key.txt", "output.txt"};
+    std::size_t p = std::stoul(argv[2]), q = std::stoul(argv[3]);
+    k.makePublicKey(p, q);
     const auto &message = load(argv[1]);
-    auto cyphered = k.cypher(message);
+    auto cyphered = k.cypher((const std::basic_string<unsigned char> &) message);
+    auto decyphered = k.decypher(cyphered, p, q);
     return 0;
 }
 

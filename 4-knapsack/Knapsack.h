@@ -27,8 +27,12 @@ public:
 
     std::vector<size_t> cypher(std::basic_string<unsigned char> message);
 
-    void log(const std::vector<size_t>& vector);
+    void log(const std::vector<size_t> &vector, bool hex);
 
-    void log(const std::vector<size_t> &vector, const bool hex);
+    std::string decypher(const std::vector<size_t> &cypher, size_t i, size_t i1);
+
+    std::vector<size_t> getKeyValIx(const size_t &value, size_t invP, size_t q, std::ofstream &off);
+
+    static size_t getInvP(const size_t p, const size_t q);
 };
 
