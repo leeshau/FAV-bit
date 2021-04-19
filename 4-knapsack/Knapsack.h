@@ -29,7 +29,7 @@ public:
 
     void log(const std::vector<size_t> &vector, bool hex);
 
-    std::string decypher(const std::vector<size_t> &cypher, size_t i, size_t i1);
+    std::basic_string<unsigned char> decypher(const std::vector<size_t> &cypher, size_t i, size_t i1);
 
     std::vector<size_t> getKeyValIx(const size_t &value, size_t invP, size_t q, std::ofstream &off);
 
