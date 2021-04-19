@@ -160,7 +160,7 @@ std::basic_string<unsigned char> Knapsack::decypher(const std::vector<size_t> &c
 }
 
 /**
- * gets inverted p according to the Knapsack algorithm
+ * gets inverted p by brute force according to the Knapsack algorithm
  * @param p p parameter for knapsack algorithm
  * @param q q parameter for knapsack algorithm
  * @return inverted p
