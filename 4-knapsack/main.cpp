@@ -1,7 +1,7 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
-#include "Knapsack.h"
+#include "Knapsack.hpp"
 
 std::string load(char *filename);
 

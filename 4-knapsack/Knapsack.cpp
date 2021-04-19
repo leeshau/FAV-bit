@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <iostream>
-#include "Knapsack.h"
+#include "Knapsack.hpp"
 #include <numeric>
 
 /**
