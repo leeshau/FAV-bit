@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.19)
+project(5_hash)
+set(CMAKE_CXX_STANDARD 14)
+include_directories(includes)
+file(GLOB SOURCES src/*.cpp)
+add_executable(5_hash ${SOURCES} src/Hasher.cpp includes/Hasher.h)

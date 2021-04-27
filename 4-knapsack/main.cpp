@@ -1,7 +1,15 @@
 #include <iostream>
-#include <filesystem>
 #include <fstream>
 #include "Knapsack.hpp"
+
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace filesystem = std::filesystem;
+#else
+#include <experimental/filesystem>
+    namespace filesystem = std::experimental::filesystem;
+#endif
+
 
 std::string load(char *filename);
 
@@ -53,9 +61,9 @@ void exportBinary(const std::basic_string<unsigned char> &decyphered, const char
  * @return string of the content in the file
  */
 std::string load(char *filename) {
-    std::filesystem::path messagePath(filename);
+    filesystem::path messagePath(filename);
 
-    if (!std::filesystem::exists(messagePath))
+    if (!filesystem::exists(messagePath))
         throw std::runtime_error("Input path does not exist!");
 
     isText = messagePath.extension() == ".txt";
@@ -64,7 +72,7 @@ std::string load(char *filename) {
     if (!stream.is_open())
         throw std::runtime_error("Error opening fstream on input file!");
 
-    auto fileSize = (std::streamsize) std::filesystem::file_size(messagePath);
+    auto fileSize = (std::streamsize) filesystem::file_size(messagePath);
     char data[fileSize];
     std::string message;
     stream.read((char*) data, fileSize);
