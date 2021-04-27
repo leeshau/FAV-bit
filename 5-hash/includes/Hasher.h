@@ -23,20 +23,30 @@ private:
     /*C*/  {1, 1, 1, 1,    1, 1, 0, 1,     0, 0, 0, 1,     0, 1, 1, 1},
     /*D*/  {1, 0, 1, 0,    0, 0, 0, 1,     0, 0, 1, 1,     1, 1, 1, 1}
     };
-//    const int8_t VECTORS_SIZE = (int8_t) VECTORS.size();
-/**
- * bits per block
- */
+
+    /**
+     * bits per block
+    */
     const int8_t BITSpBLOCK = 4;
 
-    const std::string fileName{};
+    const std::string fileName;
     unsigned long filesSize = 0;
+    std::vector<u_int16_t> ABCD{};
 public:
 
     explicit Hasher(char *fileName);
 
     int hash();
 
+    void initABCD();
+
+    static u_int16_t bitsToUInt16(const std::vector<bool> &vector);
+
+    static std::vector<bool> UInt16ToBits(const u_int16_t &uint);
+
+    static uint16_t combine(uint8_t a, uint8_t b);
+
+    void iterate(std::vector<u_int16_t> &abcd, const uint16_t &M, const bool &even);
 };
 
 
