@@ -9,6 +9,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <HF.h>
 /**
  * stands for file void, is set as an empty character for file input
  */
@@ -46,7 +47,9 @@ public:
 
     static uint16_t combine(uint8_t a, uint8_t b);
 
-    void iterate(std::vector<u_int16_t> &abcd, const uint16_t &M, const bool &even);
+    static void iterate(std::vector<u_int16_t> &abcd, const uint16_t &M, const bool &even);
+
+    static void print(const std::vector<u_int16_t>& vector);
 };
 
 
