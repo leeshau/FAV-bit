@@ -81,7 +81,6 @@ void Hasher::iterate(std::vector<u_int16_t> &abcd, const uint16_t &M, const bool
 
 void Hasher::print(const std::vector<u_int16_t> &vector) {
     std::cout << std::hex;
-//    std::cout << 10;
     for (auto uint : vector) {
         uint16_t mostLeft = 0x0F & (uint >> 12);
         uint16_t left = 0x0F & (uint >> 8);
@@ -92,8 +91,7 @@ void Hasher::print(const std::vector<u_int16_t> &vector) {
 //        std::cout << left << std::endl;
 //        std::cout << right << std::endl;
 //        std::cout << mostRight << std::endl;
-        std::cout << mostLeft << left << " "
-            << right << mostRight << " ";
+        std::cout << mostLeft << left << right << mostRight;
     }
 }
 

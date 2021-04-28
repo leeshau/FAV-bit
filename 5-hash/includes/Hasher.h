@@ -43,10 +43,6 @@ public:
 
     static u_int16_t bitsToUInt16(const std::vector<bool> &vector);
 
-    static std::vector<bool> UInt16ToBits(const u_int16_t &uint);
-
-    static uint16_t combine(uint8_t a, uint8_t b);
-
     static void iterate(std::vector<u_int16_t> &abcd, const uint16_t &M, const bool &even);
 
     static void print(const std::vector<u_int16_t>& vector);
