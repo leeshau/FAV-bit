@@ -14,13 +14,13 @@ class HF {
 
 public:
 
-    static uint16_t getNewC(unsigned short A, unsigned short B, const uint16_t &M);
+    static uint16_t getNewC(uint16_t A, uint16_t B, const uint16_t &M);
 
-    static uint16_t getNewA(unsigned short B, unsigned short C, const bool &even, unsigned short D);
+    static uint16_t getNewA(uint16_t B, uint16_t C, const bool &even, uint16_t D);
 
-    static void f1(unsigned short &B, unsigned short &C);
+    static void f1(uint16_t &B, uint16_t &C);
 
-    static void f2(unsigned short &B, unsigned short &C);
+    static void f2(uint16_t &B, uint16_t &C);
 };
 
 

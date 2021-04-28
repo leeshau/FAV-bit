@@ -18,6 +18,13 @@ Hasher::Hasher(char *fileName) : fileName(std::string(fileName)) {
     initABCD();
 }
 
+void Hasher::initABCD() {
+    ABCD.reserve(VECTORS.size());
+    for (const auto &i : VECTORS) {
+        ABCD.push_back(bitsToUInt16(i));
+    }
+}
+
 int Hasher::hash() {
     if (this->filesSize == 0 || this->fileName.empty()) {
         std::cout << "Hasher not initialised properly." << std::endl;
@@ -33,7 +40,10 @@ int Hasher::hash() {
     uint16_t buff;
     bool even = false; //start with 1
     while (!input.read((char *) &buff, 2).eof()) {
-        iterate(abcd, buff, even);
+        uint16_t edit = 0;
+        edit |= (buff >> 8);
+        edit |= (buff << 8);
+        iterate(abcd, edit, even);
         even = !even;
         buff = 0;
     }
@@ -43,30 +53,6 @@ int Hasher::hash() {
     }
     print(abcd);
     return 0;
-}
-
-void Hasher::initABCD() {
-    ABCD.reserve(VECTORS.size());
-    for (const auto &i : VECTORS) {
-        ABCD.push_back(bitsToUInt16(i));
-    }
-}
-
-u_int16_t Hasher::bitsToUInt16(const std::vector<bool> &vector) {
-    u_int16_t res = 0x00;
-    int size = (int) vector.size();
-    for (int i = 0; i < size; i++) {
-        if (vector.at(size - 1 - i))
-            res |= 1 << i;
-    }
-    return res;
-}
-
-std::vector<bool> Hasher::UInt16ToBits(const u_int16_t &uint) {
-    std::vector<bool> vector{};
-    for (int i = 0; i < 8; i++)
-        vector.at(15 - i) = (uint & (1 << i)) != 0;
-    return vector;
 }
 
 void Hasher::iterate(std::vector<u_int16_t> &abcd, const uint16_t &M, const bool &even) {
@@ -100,7 +86,7 @@ void Hasher::print(const std::vector<u_int16_t> &vector) {
         uint16_t mostLeft = 0x0F & (uint >> 12);
         uint16_t left = 0x0F & (uint >> 8);
         uint16_t right = 0x0F & (uint >> 4);
-        uint16_t mostRight(0x0F & uint);
+        uint16_t mostRight = 0x0F & uint;
 
 //        std::cout << mostLeft << std::endl;
 //        std::cout << left << std::endl;
@@ -111,4 +97,13 @@ void Hasher::print(const std::vector<u_int16_t> &vector) {
     }
 }
 
+u_int16_t Hasher::bitsToUInt16(const std::vector<bool> &vector) {
+    u_int16_t res = 0x00;
+    int size = (int) vector.size();
+    for (int i = 0; i < size; i++) {
+        if (vector.at(size - 1 - i))
+            res |= 1 << i;
+    }
+    return res;
+}
 

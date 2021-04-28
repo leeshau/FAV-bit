@@ -4,15 +4,15 @@
 
 #include "HF.h"
 
-uint16_t HF::getNewC(unsigned short A, unsigned short B, const uint16_t &M) {
-    auto newC = A;
+uint16_t HF::getNewC(uint16_t A, uint16_t B, const uint16_t &M) {
     //A xor B
-    newC ^= B;
+    A ^= B;
     //newC xor M
-    return newC ^= M;
+    A ^= M;
+    return A;
 }
 
-uint16_t HF::getNewA(unsigned short B, unsigned short C, const bool &even, unsigned short D) {
+uint16_t HF::getNewA(uint16_t B, uint16_t C, const bool &even, uint16_t D) {
     if (!even)
         //F1(B,C)
         f1(B, C);
@@ -25,7 +25,7 @@ uint16_t HF::getNewA(unsigned short B, unsigned short C, const bool &even, unsig
     return B;
 }
 
-void HF::f1(unsigned short &B, unsigned short &C) {
+void HF::f1(uint16_t &B, uint16_t &C) {
     auto leftB = B;
     auto leftC = C;
 
@@ -41,7 +41,7 @@ void HF::f1(unsigned short &B, unsigned short &C) {
 }
 
 
-void HF::f2(unsigned short &B, unsigned short &C) {
+void HF::f2(uint16_t &B, uint16_t &C) {
     auto leftB = B;
     auto leftC = C;
 
